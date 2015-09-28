@@ -84,8 +84,19 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Project List" id="nFM-my-kcO"/>
+                    <connections>
+                        <outlet property="searchDisplayController" destination="U4d-U0-RHd" id="oVz-hr-OOe"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="us2-u3-xWs" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <searchDisplayController id="U4d-U0-RHd">
+                    <connections>
+                        <outlet property="delegate" destination="hMF-MU-6Vb" id="VSV-rV-Q3W"/>
+                        <outlet property="searchContentsController" destination="hMF-MU-6Vb" id="g05-tI-mrm"/>
+                        <outlet property="searchResultsDataSource" destination="hMF-MU-6Vb" id="cqn-14-s6M"/>
+                        <outlet property="searchResultsDelegate" destination="hMF-MU-6Vb" id="4ZF-8q-uDr"/>
+                    </connections>
+                </searchDisplayController>
             </objects>
             <point key="canvasLocation" x="217" y="1286"/>
         </scene>
