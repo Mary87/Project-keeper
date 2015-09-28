@@ -13,7 +13,11 @@
 #import "PKProjectDetailsViewController.h"
 
 
-@interface PKProjectListTableViewController ()
+@interface PKProjectListTableViewController () <UISearchBarDelegate, UISearchControllerDelegate, UISearchResultsUpdating>
+
+@property (nonatomic, strong) UISearchController *searchController;
+@property (nonatomic, strong) NSMutableArray *arrayOfSearchResults;
+
 
 @end
 
@@ -22,6 +26,18 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
+    self.searchController.searchResultsUpdater = self;
+    [self.searchController.searchBar sizeToFit];
+    self.tableView.tableHeaderView = self.searchController.searchBar;
+    self.searchController.delegate = self;
+    self.searchController.dimsBackgroundDuringPresentation = NO;
+    self.searchController.searchBar.delegate = self;
+    self.definesPresentationContext = YES;
+
+    self.arrayOfSearchResults = [NSMutableArray new];
+    
     
     // Getting the list of projects from manager.
     
@@ -48,6 +64,13 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (NSArray *)arrayToDisplay {
+    if (self.searchController.active) {
+        return self.arrayOfSearchResults;
+    }
+    return self.arrayOfProjects;
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -57,7 +80,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [self.arrayOfProjects count];
+    return [[self arrayToDisplay] count];
 }
 
 
@@ -95,12 +118,9 @@
     // Displaying the content of each cell in the table.
     
     PKMyCustomTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"PrototypeProjectCell" forIndexPath:indexPath];
-    PKProject *pkProject = [self.arrayOfProjects objectAtIndex:indexPath.row];
+    PKProject *pkProject = [[self arrayToDisplay] objectAtIndex:indexPath.row];
+    
     [cell updateCellWithProject:pkProject];
-    
-
-   // [imageData release];
-    
     return cell;
 }
 
@@ -151,7 +171,7 @@
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
         
         // 2. Find the object in arraw which corresponds to the index path of tapped row.
-        PKProject *selectedProject = [self.arrayOfProjects objectAtIndex:indexPath.row];
+        PKProject *selectedProject = [[self arrayToDisplay] objectAtIndex:indexPath.row];
         
         // 3. Call of PKProjectDetailsViewController and setting his instance veriable with the selected project.
         [[segue destinationViewController] setDetailedProject:selectedProject];
@@ -161,5 +181,16 @@
     }
 }
 
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController {
+    NSString *searchString = self.searchController.searchBar.text;
+    [self.arrayOfSearchResults removeAllObjects];
+    for (PKProject *tempPKProject in self.arrayOfProjects) {
+        NSComparisonResult result = [tempPKProject.projectName compare:searchString options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) range:NSMakeRange(0, [searchString length])];
+        if (result == NSOrderedSame) {
+            [self.arrayOfSearchResults addObject:tempPKProject];
+        }
+    }
+    [self.tableView reloadData];
+}
 
 @end
